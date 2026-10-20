@@ -1,0 +1,9 @@
+name: SilentRP
+main: net.dorblacky.silentrp.SilentRP
+version: 0.0.1
+author: Jens Schwarz (DrBlacky)
+team: RW EconomyTeam
+description: "RW Plugin description ..."
+loadorder: 0
+license: MIT
+website: http://www.optional_homepage_url.com
