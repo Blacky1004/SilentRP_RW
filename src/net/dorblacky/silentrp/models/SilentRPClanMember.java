@@ -3,10 +3,19 @@ package net.dorblacky.silentrp.models;
 import java.util.Date;
 
 public class SilentRPClanMember {
+    private int id;
     private int clan_id;
     private String player_uid;
     private int rank;
     private Date invite_date;
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 
     public int getClan_id() {
         return clan_id;

@@ -49,6 +49,7 @@ public class SilentRP extends Plugin implements Listener {
     public void onDisable() {
         if(priceManager != null){
             priceManager.stopPriceTimer();
+            priceManager = null;
         }
     }
 

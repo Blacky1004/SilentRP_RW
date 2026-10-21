@@ -35,8 +35,7 @@ public class ConfigManager extends SilentRP{
             configContent.setWatermark_url("");
             configContent.setVisible_watermark(true);
             configContent.setHive_url("https://localhost:7166/api/");
-            configContent.setGoldpriceMax(9800);
-            configContent.setGoldpriceMin(1200);
+
             saveConfig(configContent);
         } else {
             String fileContent = Files.readString(configPath);

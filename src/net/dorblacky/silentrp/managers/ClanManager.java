@@ -19,8 +19,8 @@ public class ClanManager extends SilentRP {
         this.plugin = plugin;
         this.config = config;
 
-        clanList = DatabaseManager.getClanList();
-        System.out.println("[SILENTRP-CLMGR] Clanmanager has been initialized with "+clanList.size()+" clans.");
+        ClanManager.clanList = DatabaseManager.getClanList();
+        System.out.println("[SILENTRP-CLMGR] Clanmanager has been initialized with "+ClanManager.clanList.size()+" clans.");
     }
 
     public SilentRPClan getClanById(int id) {
@@ -33,22 +33,14 @@ public class ClanManager extends SilentRP {
     }
 
     public static SilentRPClan createClan(String clanName, String clanDescription, SilentRpPlayer clanOwner){
-        SilentRPClan clan = null;
-        silentDatabase.executeUpdate("INSERT INTO `srp_clans` (`clan_name`, `clan_owner`) VALUES ('"+clanName+"', "+clanOwner.getId()+"); SELECT last_insert_rowid();");
-        try(ResultSet result =silentDatabase.executeQuery("SELECT id FROM `srp_clans` WHERE `clan_name` = '"+clanName+"';")) {
-            if(result.next()) {
-                clan = new SilentRPClan();
-                clan.setId(result.getInt("id"));
-                clan.setClan_owner(clanOwner);
-                clan.setName(clanName);
-
-                if(addClanMember(clan.getId(), clanOwner.getPlayer_guid(), clanMemberType.MASTER)){
-                    clan.setMembers(DatabaseManager.getClanMembers(clan.getId()));
-                }
-                clanList.add(clan);
+        SilentRPClan clan = DatabaseManager.createClan(clanName, clanDescription, clanOwner, true);
+        if(clan != null && clan.getId() > 0){
+            SilentRPClanMember member = DatabaseManager.createClanMember(clan.getId(), clanOwner.getPlayer_guid(), getClanMemberTypeNumber(clanMemberType.MEMBER));
+            if(member != null && member.getId() > 0){
+                clan.setMembers(DatabaseManager.getClanMembers(clan.getId()));
             }
-        }catch (SQLException e) {
-            System.out.println("[SILENTRP-CLMGR] Cannot create clan. :" + e.getMessage());
+            
+            clanList.add(clan);
         }
         return clan;
     }
@@ -69,14 +61,13 @@ public class ClanManager extends SilentRP {
     }
 
     public static boolean addClanMember(int clanId, String playerUid, clanMemberType type){
-        for (SilentRPClan clan : ClanManager.clanList) {
-            if(clan.getId() == clanId){
-                silentDatabase.executeUpdate("INSERT INTO `srp_clanmembers` (`clan_id`, `player_uid`, `rank`) VALUES ("+clanId+", '"+playerUid+"', "+getClanMemberTypeNumber(type)+");");
-                SilentRPClanMember member = new SilentRPClanMember();
-
-                return true;
-            }
+        try{
+            silentDatabase.executeUpdate("INSERT INTO `srp_clanmembers` (`clan_id`, `player_uid`, `rank`) VALUES ("+clanId+", '"+playerUid+"', "+getClanMemberTypeNumber(type)+");");
+            return true;
+        } catch(Exception e){
+            System.out.println("[SILENTRP-CLMGR] ERROR in function addClanMember: "+e.getMessage());
         }
+
         return false;
     }
 

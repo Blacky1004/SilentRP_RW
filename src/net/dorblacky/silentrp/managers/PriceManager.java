@@ -7,6 +7,7 @@ import net.dorblacky.silentrp.models.SilentRPPriceConfig;
 import net.risingworld.api.Plugin;
 import net.risingworld.api.Server;
 import net.risingworld.api.Timer;
+import net.risingworld.api.objects.Player;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -23,7 +24,7 @@ public class PriceManager extends SilentRP {
     public PriceManager(Plugin plugin, SilentRPConfig config) {
         this.plugin = plugin;
         this.config = config;
-        this.timer = new Timer(60, 0,-1, this::doWork);
+        this.timer = new Timer(1200, 0,-1, this::doWork);
         String configFullName = this.plugin.getPath() + "/prices.json";
         SilentRPPriceConfig configContent = new SilentRPPriceConfig();
         Path configPath = Path.of(configFullName);
@@ -38,20 +39,23 @@ public class PriceManager extends SilentRP {
 
     public void startPriceTimer()
     {
-        PriceManager.aktualGoldPrice = ThreadLocalRandom.current().nextInt(priceConfig.getGoldpriceMin(), priceConfig.getGoldpriceMax());
+        PriceManager.aktualGoldPrice = ThreadLocalRandom.current().nextInt(priceConfig.getGoldpriceMin(), priceConfig.getGoldprice_max());
         System.out.println("[SILENTRP-PRICEMGM] Pricemanager started width gold price: " + PriceManager.aktualGoldPrice);
         timer.start();
     }
     private void doWork(){
         int oldGoldPrice = aktualGoldPrice;
-        aktualGoldPrice = ThreadLocalRandom.current().nextInt(priceConfig.getGoldpriceMin(), priceConfig.getGoldpriceMax());
+        aktualGoldPrice = ThreadLocalRandom.current().nextInt(priceConfig.getGoldpriceMin(), priceConfig.getGoldprice_max());
         if(oldGoldPrice != aktualGoldPrice){
-            double prozentAenderung = ((oldGoldPrice - aktualGoldPrice) / aktualGoldPrice) * 100;
-
-            if(oldGoldPrice < config.getGoldpriceMin()){
-                Server.broadcastYellMessage("Der aktuelle Goldpreis ist um "+Math.abs(prozentAenderung)+" gestiegen", 100, true);
+            double prozentAenderung = ((double)(aktualGoldPrice - oldGoldPrice) / oldGoldPrice) * 100;
+            String priceMessage = "";
+            if(oldGoldPrice < aktualGoldPrice){
+                priceMessage= "Der aktuelle <color=\"#c9a214\">Goldpreis</color> ist um <color=\"#20af0a\">"+String.format("%.2f", Math.abs(prozentAenderung))+"%</color> gestiegen";
             } else{
-                Server.broadcastYellMessage("Der aktuelle Goldpreis ist um "+Math.abs(prozentAenderung)+" gesunken", 100, true);
+                priceMessage= "Der aktuelle <color=\"#c9a214\">Goldpreis</color> ist um <color=\"#c94e22\">"+String.format("%.2f", Math.abs(prozentAenderung))+"%</color> gesunken";
+            }
+            for (Player p : Server.getAllPlayers()){
+                p.sendTextMessage(priceMessage);
             }
         }
         System.out.println("[SILENTRP-PRICEMGM] Der Golpreis wurde auf "+aktualGoldPrice+" € aktualisiert.");

@@ -12,8 +12,7 @@ public class SilentRPConfig {
     private int player_startmoney;
     private boolean enable_paychecksystem;
     private int paychecksystem_interval;
-    private int goldpriceMin;
-    private int goldpriceMax;
+
     public String getApiKey() {
         return apikey;
     }
@@ -100,21 +99,5 @@ public class SilentRPConfig {
 
     public void setHive_url(String hive_url) {
         this.hive_url = hive_url;
-    }
-
-    public int getGoldpriceMin() {
-        return goldpriceMin;
-    }
-
-    public void setGoldpriceMin(int goldpriceMin) {
-        this.goldpriceMin = goldpriceMin;
-    }
-
-    public int getGoldpriceMax() {
-        return goldpriceMax;
-    }
-
-    public void setGoldpriceMax(int goldpriceMax) {
-        this.goldpriceMax = goldpriceMax;
     }
 }

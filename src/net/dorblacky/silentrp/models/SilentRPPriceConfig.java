@@ -5,8 +5,9 @@ import java.util.Map;
 public class SilentRPPriceConfig {
     private float vat_percent;
     private float purchase_percent;
-    private int goldpriceMin;
-    private int goldpriceMax;
+
+    private int goldprice_min;
+    private int goldprice_max;
     private Map<String, Integer> items;
 
     public float getVat_percent() {
@@ -26,19 +27,19 @@ public class SilentRPPriceConfig {
     }
 
     public int getGoldpriceMin() {
-        return goldpriceMin;
+        return goldprice_min;
     }
 
     public void setGoldpriceMin(int goldpriceMin) {
-        this.goldpriceMin = goldpriceMin;
+        this.goldprice_min = goldprice_min;
     }
 
-    public int getGoldpriceMax() {
-        return goldpriceMax;
+    public int getGoldprice_max() {
+        return goldprice_max;
     }
 
-    public void setGoldpriceMax(int goldpriceMax) {
-        this.goldpriceMax = goldpriceMax;
+    public void setGoldprice_max(int goldprice_max) {
+        this.goldprice_max = goldprice_max;
     }
 
     public Map<String, Integer> getItems() {
