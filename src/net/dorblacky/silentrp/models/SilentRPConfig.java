@@ -1,6 +1,6 @@
 package net.dorblacky.silentrp.models;
 
-public class SilentRPConfigContent {
+public class SilentRPConfig {
     private String apikey;
     private boolean visible_watermark;
     private String watermark_url;
@@ -12,7 +12,8 @@ public class SilentRPConfigContent {
     private int player_startmoney;
     private boolean enable_paychecksystem;
     private int paychecksystem_interval;
-
+    private int goldpriceMin;
+    private int goldpriceMax;
     public String getApiKey() {
         return apikey;
     }
@@ -101,6 +102,19 @@ public class SilentRPConfigContent {
         this.hive_url = hive_url;
     }
 
+    public int getGoldpriceMin() {
+        return goldpriceMin;
+    }
 
+    public void setGoldpriceMin(int goldpriceMin) {
+        this.goldpriceMin = goldpriceMin;
+    }
 
+    public int getGoldpriceMax() {
+        return goldpriceMax;
+    }
+
+    public void setGoldpriceMax(int goldpriceMax) {
+        this.goldpriceMax = goldpriceMax;
+    }
 }

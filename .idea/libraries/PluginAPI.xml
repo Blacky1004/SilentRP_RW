@@ -1,7 +1,7 @@
 <component name="libraryTable">
   <library name="PluginAPI">
     <CLASSES>
-      <root url="jar://$PROJECT_DIR$/../../../../SteamLibrary/steamapps/common/RisingWorld/Data/SDK/PluginAPI.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../SteamLibrary/steamapps/common/RisingWorldDedicatedServer/Data/SDK/PluginAPI.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

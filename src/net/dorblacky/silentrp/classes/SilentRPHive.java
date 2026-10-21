@@ -7,7 +7,7 @@ import net.dorblacky.silentrp.api.SilentRPApiBanlistRequest;
 import net.dorblacky.silentrp.api.SilentRPApiBanlistResponse;
 import net.dorblacky.silentrp.api.SilentRPApiConnectRequest;
 import net.dorblacky.silentrp.api.SilentRPApiConnectResponse;
-import net.dorblacky.silentrp.models.SilentRPConfigContent;
+import net.dorblacky.silentrp.models.SilentRPConfig;
 import net.risingworld.api.Server;
 
 import javax.net.ssl.*;
@@ -20,8 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SilentRPHive extends SilentRP {
-    private final SilentRPConfigContent silentConfig;
-    public SilentRPHive(SilentRPConfigContent contentData) {
+    private final SilentRPConfig silentConfig;
+    public SilentRPHive(SilentRPConfig contentData) {
         this.silentConfig = contentData;
     }
     public SilentRPApiConnectResponse connect() {

@@ -1,12 +1,12 @@
-package net.dorblacky.silentrp.classes;
+package net.dorblacky.silentrp.managers;
 
 import net.dorblacky.silentrp.SilentRP;
 import net.risingworld.api.Plugin;
 
-public class GlobalBanSystem extends SilentRP {
+public class GlobalBanManager extends SilentRP {
     private final int bannAtPoints;
     private final Plugin plugin;
-    public GlobalBanSystem(Plugin plugin, int bannAtPoints){
+    public GlobalBanManager(Plugin plugin, int bannAtPoints){
         this.bannAtPoints = bannAtPoints;
         this.plugin = plugin;
     }
