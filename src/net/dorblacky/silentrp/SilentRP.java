@@ -36,7 +36,7 @@ public class SilentRP extends Plugin implements Listener {
             new CommandManager(this, silentConfigData);
             new PlayerManager(this, silentConfigData);
             new ClanManager(this, silentConfigData);
-
+            new TradingManager(this, silentConfigData);
             priceManager = new PriceManager(this, silentConfigData);
             priceManager.startPriceTimer();
 

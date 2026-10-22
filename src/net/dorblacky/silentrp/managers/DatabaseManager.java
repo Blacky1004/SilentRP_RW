@@ -3,9 +3,7 @@ package net.dorblacky.silentrp.managers;
 import net.dorblacky.silentrp.SilentRP;
 import net.dorblacky.silentrp.classes.GlobalBanEntry;
 import net.dorblacky.silentrp.classes.SilentRpPlayer;
-import net.dorblacky.silentrp.models.SilentRPClan;
-import net.dorblacky.silentrp.models.SilentRPClanMember;
-import net.dorblacky.silentrp.models.SilentRPConfig;
+import net.dorblacky.silentrp.models.*;
 import net.risingworld.api.Plugin;
 import net.risingworld.api.World;
 
@@ -29,12 +27,14 @@ public class DatabaseManager extends SilentRP {
         String dbPath = this.plugin.getPath() + "/" + worldName + "/silentrp.db";
 
         silentDatabase = this.getSQLiteConnection(dbPath);
+
         //Pluginversion Tabelle
         silentDatabase.execute("CREATE TABLE IF NOT EXISTS `srp_version` (`version` VARCHAR(50) NOT NULL DEFAULT '0.0.1', `version_date` DATETIME DEFAULT CURRENT_TIMESTAMP);");
 
         //Playertabelle
         silentDatabase.execute("CREATE TABLE IF NOT EXISTS `srp_players` (`player_uid` VARCHAR(36) PRIMARY KEY NOT NULL ,`player_money` INTEGER NOT NULL DEFAULT 0, " +
                 "`player_level` INTEGER NOT NULL DEFAULT 1, `player_xp` INTEGER NOT NULL default 0, `player_clan` INTEGER NULL);");
+
         //Clan Tabelle
         silentDatabase.execute("CREATE TABLE IF NOT EXISTS `srp_clans` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `clan_name` VARCHAR(50) NOT NULL, `clan_owner` VARCHAR(36) NOT NULL,`clan_tag` VARCHAR(20) NULL," +
                 "`clan_description` TEXT NULL, `public_invite` BOOLEAN NOT NULL default false, `clan_rank` INTEGER NOT NULL DEFAULT 1, `clan_xp` INTEGER NOT NULL DEFAULT 0, " +
@@ -48,6 +48,18 @@ public class DatabaseManager extends SilentRP {
 
         //Plugin Spawnpoints Tabelle
         silentDatabase.execute("CREATE TABLE IF NOT EXISTS `srp_spawns`(`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `x` FLOAT NOT NULL, `y` FLOAT NOT NULL, `z` FLOAT NOT NULL , `name` varchar(255) NOT NULL, `description` TEXT, `thumbnail` varchar(255) null);");
+
+        //Plugin TraderNPC's Tabelle
+        silentDatabase.execute("CREATE TABLE IF NOT EXISTS `srp_traders` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `type_id` INTEGER NOT NULL, " +
+                "`name` VHARCHAR(90, `postition` TEXT NOT NULL DEFAULT '{}', `traded_money` INTEGER NOT NULL DEFAULT 0, `trader_type` INTEGER NOT NULL DEFAULT 0 );");
+
+        //Plugin Auktionen Tabelle
+        silentDatabase.execute("CREATE TABLE IF NOT EXISTS `srp_auctions`(`id` TEXT PRIMARY KEY NOT NULL, `item_id` VARCHAR(255) NOT NULL, `start_price` INTEGER NOT NULL," +
+                " `start_date` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, `end_date` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, `seller_id` VARCHAR(36) NOT NULL, " +
+                " `bet_price` INTEGER NOT NULL DEFAULT 0, `byitnow` BOOLEAN NOT NULL DEFAULT true, `betplayer` VARCHAR(36) NULL);");
+
+        //Plugin Tabelle SteuernTabelle
+        silentDatabase.execute("CREATE TABLE IF NOT EXISTS `srp_taxoffice`(`state_assets` TEXT NOT NULL, `bank_name` TEXT NOT NULL);");
 
         try(ResultSet result = silentDatabase.executeQuery("SELECT `version` FROM srp_version")) {
             if(!result.next()) {
@@ -253,5 +265,101 @@ public class DatabaseManager extends SilentRP {
             member = null;
         }
         return member;
+    }
+
+    public static List<SilentTrader> getTraderNPCs(){
+        List<SilentTrader> traders = new ArrayList<SilentTrader>();
+        try(ResultSet result = silentDatabase.executeQuery("SELECt * FROM `srp_traders`;")){
+            while (result.next()) {
+                SilentTrader trader = new SilentTrader();
+                trader.setId(result.getInt("id"));
+                trader.setName(result.getString("name"));
+                trader.setNpc_typeid(result.getInt("type_id"));
+                trader.setPosition(result.getString("position"));
+                trader.setTraded_money(result.getInt("traded_money"));
+                trader.setTrader_type(result.getInt("trader_type"));
+                traders.add(trader);
+            }
+        } catch(SQLException e){
+            System.out.println("[SILENTRP-DBM] ERROR in getTraderNPCs: "+e.getMessage());
+        }
+        return traders;
+    }
+
+    public static SilentTrader createTrader(SilentTrader trader){
+        String sql = "INSERT INTO `srp_traders` (`type_id`, `name`, `position`, `traded_money`, `trader_type`) VALUES (?, ?, ?, ?, ?);";
+        Connection conn = silentDatabase.getConnection();
+        try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            stmt.setInt(1, trader.getNpc_typeid());
+            stmt.setString(2, trader.getName());
+            stmt.setString(3, trader.getPosition());
+            stmt.setInt(4, trader.getTraded_money());
+            stmt.setInt(5, trader.getTrader_type());
+            int affectedRows = stmt.executeUpdate();
+            if(affectedRows > 0) {
+                try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        trader.setId(generatedKeys.getInt(1));
+                    }
+                }
+            }
+        } catch(SQLException e){
+            System.out.println("[SILENTRP-DBM] ERROR in createTrader: " + e.getMessage());
+            return null;
+        }
+        return trader;
+    }
+
+    public List<SilentRPAuction>  getAuctions(){
+        List<SilentRPAuction> auctions = new ArrayList<>();
+        try (ResultSet result = silentDatabase.executeQuery("SELECT * FROM `srp_auctions`;")){
+            while (result.next()) {
+                SilentRPAuction auction = new SilentRPAuction();
+                auction.setBetPlayer(result.getString("betplayer"));
+                auction.setBetPrice(result.getInt("betprice"));
+                auction.setBuyItNow(result.getBoolean("buyitnow"));
+                auction.setEndDate(result.getDate("end_date"));
+                auction.setItemId(result.getString("itemid"));
+            }
+        } catch (SQLException e) {
+            System.out.println("[SILENTRP-DBM] ERROR in getAuctions: "+e.getMessage());
+        }
+        return auctions;
+    }
+
+    public static SilentRPTaxOffice getTaxOffice(){
+        SilentRPTaxOffice  taxOffice = new SilentRPTaxOffice();
+        try(ResultSet result = silentDatabase.executeQuery("SELECT * FROM `srp_taxoffice`")) {
+            if(result.next()) {
+                taxOffice.setBankName(result.getString("bank_name"));
+                taxOffice.setStateAsstes(result.getString("state_assets"));
+            }
+        } catch (SQLException e) {
+            System.out.println("[SILENTRP-DBM] ERROR in getTaxOffice: "+e.getMessage());
+        }
+        return taxOffice;
+    }
+
+    public static void createTaxOffice(SilentRPTaxOffice taxOffice){
+        String sql = "INSERT INTO `srp_taxoffice` (`state_assets`, `bank_name`) VALUES (?, ?);";
+        Connection conn = silentDatabase.getConnection();
+        try(PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, taxOffice.getStateAsstes());
+            stmt.setString(2, taxOffice.getBankName());
+            int affectedRows = stmt.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println("[SILENTRP-DBM] ERROR in createTaxOffice: "+e.getMessage());
+        }
+    }
+
+    public static void updateTaxeState(String stateAssets) {
+        String sql = "UPDATE `srp_taxoffice` SET `state_assets` = ?;";
+        Connection conn = silentDatabase.getConnection();
+        try(PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, stateAssets);
+            int affectedRows = stmt.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println("[SILENTRP-DBM] ERROR in updateTaxeState: "+e.getMessage());
+        }
     }
 }

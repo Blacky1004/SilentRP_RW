@@ -12,6 +12,8 @@ import net.risingworld.api.objects.Player;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayDeque;
+import java.util.Queue;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class PriceManager extends SilentRP {
@@ -20,6 +22,7 @@ public class PriceManager extends SilentRP {
     private final Timer timer;
     public static int aktualGoldPrice = 0;
     public static SilentRPPriceConfig priceConfig;
+    public static Queue<Integer> statistiken = new ArrayDeque<>();
 
     public PriceManager(Plugin plugin, SilentRPConfig config) {
         this.plugin = plugin;
@@ -41,6 +44,7 @@ public class PriceManager extends SilentRP {
     {
         PriceManager.aktualGoldPrice = ThreadLocalRandom.current().nextInt(priceConfig.getGoldpriceMin(), priceConfig.getGoldprice_max());
         System.out.println("[SILENTRP-PRICEMGM] Pricemanager started width gold price: " + PriceManager.aktualGoldPrice);
+        statistiken.add(PriceManager.aktualGoldPrice);
         timer.start();
     }
     private void doWork(){
@@ -58,6 +62,10 @@ public class PriceManager extends SilentRP {
                 p.sendTextMessage(priceMessage);
             }
         }
+        if(statistiken.size() == 10){
+            statistiken.poll();
+        }
+        statistiken.add(aktualGoldPrice);
         System.out.println("[SILENTRP-PRICEMGM] Der Golpreis wurde auf "+aktualGoldPrice+" € aktualisiert.");
     }
 

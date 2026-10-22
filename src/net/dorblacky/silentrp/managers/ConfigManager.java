@@ -35,6 +35,12 @@ public class ConfigManager extends SilentRP{
             configContent.setWatermark_url("");
             configContent.setVisible_watermark(true);
             configContent.setHive_url("https://localhost:7166/api/");
+            configContent.setAuctions_fee_percent(10.0f);
+            configContent.setPaychecksystem_interval(20);
+            configContent.setPlayer_startmoney(0);
+            configContent.setTaxbank_name("");
+            configContent.setEnable_guildsystem(true);
+            configContent.setCreate_guild_price(2500);
 
             saveConfig(configContent);
         } else {

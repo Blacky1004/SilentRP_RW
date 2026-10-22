@@ -6,12 +6,16 @@ public class SilentRPConfig {
     private String watermark_url;
     private boolean enable_global_ban;
     private int global_ban_atpoints;
+    private boolean enable_guildsystem;
     private boolean enable_levelsystem;
     private boolean enable_robberysystem;
     private String hive_url;
     private int player_startmoney;
     private boolean enable_paychecksystem;
     private int paychecksystem_interval;
+    private float auctions_fee_percent;
+    private String taxbank_name;
+    private int create_guild_price;
 
     public String getApiKey() {
         return apikey;
@@ -99,5 +103,37 @@ public class SilentRPConfig {
 
     public void setHive_url(String hive_url) {
         this.hive_url = hive_url;
+    }
+
+    public float getAuctions_fee_percent() {
+        return auctions_fee_percent;
+    }
+
+    public void setAuctions_fee_percent(float auctions_fee_percent) {
+        this.auctions_fee_percent = auctions_fee_percent;
+    }
+
+    public String getTaxbank_name() {
+        return taxbank_name;
+    }
+
+    public void setTaxbank_name(String taxbank_name) {
+        this.taxbank_name = taxbank_name;
+    }
+
+    public boolean isEnable_guildsystem() {
+        return enable_guildsystem;
+    }
+
+    public void setEnable_guildsystem(boolean enable_guildsystem) {
+        this.enable_guildsystem = enable_guildsystem;
+    }
+
+    public int getCreate_guild_price() {
+        return create_guild_price;
+    }
+
+    public void setCreate_guild_price(int create_guild_price) {
+        this.create_guild_price = create_guild_price;
     }
 }
