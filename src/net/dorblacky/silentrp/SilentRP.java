@@ -4,6 +4,7 @@ import net.dorblacky.silentrp.managers.ConfigManager;
 import net.dorblacky.silentrp.managers.*;
 import net.dorblacky.silentrp.models.SilentRPConfig;
 import net.risingworld.api.Plugin;
+import net.risingworld.api.assets.AssetBundle;
 import net.risingworld.api.database.Database;
 import net.risingworld.api.events.Listener;
 
@@ -14,6 +15,7 @@ public class SilentRP extends Plugin implements Listener {
     protected static String silentVersion = "0.0.3";
     protected String silentPath = this.getPath();
     public static SilentRPConfig silentConfigData;
+    public static AssetBundle silentAsstsBudle;
     private ConfigManager silentConfig;
     public  PriceManager priceManager;
     @Override
@@ -21,6 +23,7 @@ public class SilentRP extends Plugin implements Listener {
         try {
             silentConfig = new ConfigManager(this);
             this.silentConfigData = silentConfig.readConfig();
+            //silentAsstsBudle = AssetBundle.loadFromFile(this.getPath() + "/prefab/silentrp.bundle");
 //            if(Objects.equals(this.silentConfigData.getApiKey(), this.anonymousApiKey)) {
 //                System.out.println("[SILENTRP-MAIN] Please register this Plugin under https://silentrp.de or entry your ApiKey in configfile!");
 //            }
@@ -40,6 +43,7 @@ public class SilentRP extends Plugin implements Listener {
             priceManager = new PriceManager(this, silentConfigData);
             priceManager.startPriceTimer();
 
+            new TaxOfficeManager(this, silentConfigData);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

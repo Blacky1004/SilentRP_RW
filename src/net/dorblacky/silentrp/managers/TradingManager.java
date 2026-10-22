@@ -50,7 +50,7 @@ public class TradingManager extends SilentRP implements Listener {
         }
     }
 
-    private static short getNextTraderId(){
+    public static short getNextTraderId(){
         return (short) Arrays.stream(World.getAllNpcs()).mapToInt(Npc::getTypeID).max().orElse(0);
     }
 
@@ -89,6 +89,8 @@ public class TradingManager extends SilentRP implements Listener {
             }
             if(!npc.isAlerted()){
                 npc.setAlerted(true);
+                if(npc.isLocked()) npc.setLocked(false);
+
                 npc.setAttackReaction(Npcs.AttackReaction.Escape);
             }
         }
@@ -100,7 +102,10 @@ public class TradingManager extends SilentRP implements Listener {
         Npc npc = event.getNpc();
 
         if(silentConfigData.isEnable_robberysystem()){
-
+            //npc.setLocked(true);
+            //npc.kill();
         }
     }
+
+
 }

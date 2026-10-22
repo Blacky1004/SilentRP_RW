@@ -51,7 +51,7 @@ public class DatabaseManager extends SilentRP {
 
         //Plugin TraderNPC's Tabelle
         silentDatabase.execute("CREATE TABLE IF NOT EXISTS `srp_traders` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `type_id` INTEGER NOT NULL, " +
-                "`name` VHARCHAR(90, `postition` TEXT NOT NULL DEFAULT '{}', `traded_money` INTEGER NOT NULL DEFAULT 0, `trader_type` INTEGER NOT NULL DEFAULT 0 );");
+                "`name` VARCHAR(90), `position` TEXT NOT NULL DEFAULT '{}', `traded_money` INTEGER NOT NULL DEFAULT 0, `trader_type` INTEGER NOT NULL DEFAULT 0 );");
 
         //Plugin Auktionen Tabelle
         silentDatabase.execute("CREATE TABLE IF NOT EXISTS `srp_auctions`(`id` TEXT PRIMARY KEY NOT NULL, `item_id` VARCHAR(255) NOT NULL, `start_price` INTEGER NOT NULL," +
