@@ -4,6 +4,7 @@ import net.dorblacky.silentrp.SilentRP;
 import net.dorblacky.silentrp.models.SilentRPConfig;
 import net.risingworld.api.Plugin;
 import net.risingworld.api.Server;
+import net.risingworld.api.World;
 import net.risingworld.api.assets.TextureAsset;
 import net.risingworld.api.events.EventMethod;
 import net.risingworld.api.events.Listener;
@@ -11,6 +12,7 @@ import net.risingworld.api.events.player.PlayerConnectEvent;
 import net.risingworld.api.events.player.PlayerSpawnEvent;
 import net.risingworld.api.objects.Player;
 import net.risingworld.api.ui.UIElement;
+import net.risingworld.api.utils.Key;
 
 import java.util.Arrays;
 
@@ -63,6 +65,15 @@ public class PlayerManager extends SilentRP implements Listener {
             System.out.println("Player found in db");
             assert playerData != null;
             player.setAttribute("srp_player", playerData);
+            if(playerData.isNewPlayer()){
+                player.sendTextMessage("Hallo und willkommen neuer Spieler auf "+ World.getName());
+                //Hier abfrage nach tutorial
+            }
+            if(silentConfig.isEnable_paychecksystem()){
+                player.setAttribute("paycheck", Server.getRunningTime());
+            }
+            player.registerKeys(Key.F11);
+            player.setListenForKeyInput(true);
         }
     }
 

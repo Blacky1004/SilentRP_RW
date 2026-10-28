@@ -1,14 +1,12 @@
 package net.dorblacky.silentrp.managers;
 
 import net.dorblacky.silentrp.SilentRP;
-import net.dorblacky.silentrp.classes.SilentRpPlayer;
+import net.dorblacky.silentrp.models.SilentRpPlayer;
 import net.dorblacky.silentrp.models.SilentRPClan;
 import net.dorblacky.silentrp.models.SilentRPClanMember;
 import net.dorblacky.silentrp.models.SilentRPConfig;
 import net.risingworld.api.Plugin;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.List;
 
 public class ClanManager extends SilentRP {

@@ -1,30 +1,18 @@
 package net.dorblacky.silentrp.managers;
 
 import net.dorblacky.silentrp.SilentRP;
-import net.dorblacky.silentrp.classes.SilentRpPlayer;
-import net.dorblacky.silentrp.models.SilentRPClan;
-import net.dorblacky.silentrp.models.SilentRPConfig;
+import net.dorblacky.silentrp.models.SilentRpPlayer;
+import net.dorblacky.silentrp.models.*;
 import net.risingworld.api.Plugin;
-import net.risingworld.api.Server;
-import net.risingworld.api.World;
-import net.risingworld.api.database.WorldDatabase;
-import net.risingworld.api.definitions.Definitions;
-import net.risingworld.api.definitions.Items;
-import net.risingworld.api.definitions.Npcs;
 import net.risingworld.api.events.EventMethod;
 import net.risingworld.api.events.Listener;
-import net.risingworld.api.events.Threading;
 import net.risingworld.api.events.player.PlayerCommandEvent;
 import net.risingworld.api.events.player.PlayerKeyEvent;
-import net.risingworld.api.events.player.PlayerMouseButtonEvent;
-import net.risingworld.api.objects.Area;
-import net.risingworld.api.objects.Item;
-import net.risingworld.api.objects.Player;
-import net.risingworld.api.objects.WorldItem;
-import net.risingworld.api.utils.AreaSelectionResult;
-import net.risingworld.api.utils.Key;
-import net.risingworld.api.utils.MouseButton;
-import net.risingworld.api.utils.Vector3f;
+import net.risingworld.api.objects.*;
+import net.risingworld.api.utils.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class CommandManager extends SilentRP implements Listener {
     private final Plugin plugin;
@@ -47,8 +35,9 @@ public class CommandManager extends SilentRP implements Listener {
                     default:
                         player.sendTextMessage("FEHLER! der Befehl '"+cmdArr[0]+"' nicht gefunden!"); break;
                     case "/create_clan": createClanCommand(player, command); break;
-                    case "/create_trader": createTrader(player); break;
-                    case "/save_trader": saveTrader(player); break;
+//                    case "/create_trader": createTrader(player); break;
+//                    case "/save_trader": saveTrader(player); break;
+                    case "/update_trader": updateTrader(player); break;
                 }
             }
         } catch(Exception e) {
@@ -84,63 +73,91 @@ public class CommandManager extends SilentRP implements Listener {
         }
     }
 
-    private void createTrader(Player p){
-        p.sendTextMessage("Du kannst");
-        if(p.isAdmin()){
-            p.registerKeys(Key.F4);
-            p.setListenForKeyInput(true);
-            p.setAttribute("areatool", true);
-            p.enableAreaSelectionTool(false);
-            isAreaToolEnabled = true;
-        } else{
-            p.sendTextMessage("<color=\"red\">Du bist nicht berechtigt diesen Befehl auszuführen!</color>");
-        }
-    }
-
-
-    private void saveTrader(Player p) {
-        p.getAreaSelectionData((AreaSelectionResult area) -> {
-            Vector3f start = Vector3f.ZERO;
-            Vector3f end = Vector3f.ZERO;
-            if(area == null){
-                System.out.println("Area´selection tool is not active!");
-            } else{
-                if(area.isStartPositionSet()){
-                    start = area.getStartPosition();
+    private void updateTrader(Player p){
+        p.getNpcInLineOfSight(10,(npc) -> {
+            if(npc != null && npc.hasAttribute("trader", Integer.class)){
+                int trader_id = (int) npc.getAttribute("trader");
+                SilentTrader trader = TradingManager.traders.stream().filter(t ->t.getId()  == trader_id).findFirst().orElse(null);
+                if(trader != null){
+                    TradingManager.editTrader(p, trader, npc, plugin);
                 }
-
-                if(area.isEndPositionSet()){
-                    end = area.getEndPosition();
-                }
-                short typeId = TradingManager.getNextTraderId();
-                var npc = World.spawnNpc(typeId, 0 ,start, p.getRotation(), true);
-
-                if(npc != null){
-                    npc.setLocked(true);
-                    npc.setStatic(true);
-                    npc.setName("Neuer Trader");
-                    Server.saveNpcs();
+            } else if(npc != null && !npc.hasAttribute("trader", Integer.class)) {
+                SilentTrader trader = new SilentTrader();
+                trader.setDeathTime(0);
+                trader.setTraded_money(0);
+                trader.setNpc_typeid(npc.getGlobalID());
+                trader.setName(npc.getName());
+                trader.setTraderType(SilentTrader.traderType.SHOP);
+                trader.setTraderPosition(npc.getPosition(), npc.getRotation());
+                trader = DatabaseManager.createTrader(trader);
+                assert trader != null;
+                if(trader.getId() > 0) {
+                    TradingManager.traders.add(trader);
+                    TradingManager.editTrader(p, trader, npc, plugin);
                 }
             }
         });
-        p.disableAreaSelectionTool();
+
+
+    }
+    private void addTrader(Player p) {
+//        p.getAreaSelectionData((AreaSelectionResult area) -> {
+//            Vector3f start = Vector3f.ZERO;
+//            Vector3f end = Vector3f.ZERO;
+//            if(area == null){
+//                System.out.println("Area´selection tool is not active!");
+//            } else{
+//                if(area.isStartPositionSet()){
+//                    start = area.getStartPosition();
+//                }
+//
+//                if(area.isEndPositionSet()){
+//                    end = area.getEndPosition();
+//                }
+//                Vector3f direction = p.getPosition().subtract(p.getPosition()).normalizeLocal();
+//
+//                //Calculate rotation (quaternion)
+//                Quaternion rotation = new Quaternion();
+//                rotation.lookAt(direction);
+//                Npc npc = World.spawnNpc((short) 200, 0 ,start, rotation, true);
+//
+//                if(npc != null){
+//                    SilentTrader trader = new SilentTrader();
+//                    trader.setNpc_typeid(npc.getGlobalID());
+//                    trader.setTraderType(SilentTrader.traderType.SHOP);
+//                    trader.setTraderPosition(npc.getPosition(), npc.getRotation());
+//                    trader.setName("Neuer Trader");
+//                    trader.setTraded_money(0);
+//
+//                    npc.setName("Neuer Trader");
+//                    npc.setAttribute("trader",  trader.getNpc_typeid());
+//                    npc.setBehaviour (Npcs.Behaviour.Dummy);
+//                    World.getNpc(npc.getGlobalID()).setLocked(true);
+//                    Server.saveNpcs();
+//
+//                    TradingManager.editTrader(p, trader, npc,plugin);
+//                }
+//            }
+//        });
+//        isAreaToolEnabled = false;
+//        p.disableAreaSelectionTool();
+        p.getNpcInLineOfSight(10, (npc) -> {
+            if(npc != null){
+                //Haben wir bereits einen Trader mit der npcid
+            }
+        });
     }
 
     @EventMethod
     public  void onPlayerKey(PlayerKeyEvent e){
         Player p =e.getPlayer();
-        if(isAreaToolEnabled && e.getKey() == Key.F4 && e.isPressed()){
-            saveTrader(p);
+        if(isAreaToolEnabled && e.getKey() == Key.Enter && e.isPressed()){
+            //saveTrader(p);
+        } else if(isAreaToolEnabled && e.getKey() == Key.Delete && e.isPressed()) {
+            isAreaToolEnabled = false;
+            p.disableAreaSelectionTool();
         }
     }
 
-    @EventMethod
-    public void onPlayerMouseButton(PlayerMouseButtonEvent event) {
-        Player player = event.getPlayer();
 
-        if (event.getButton() == MouseButton.Middle && event.isPressed()) {
-            player.disableAreaSelectionTool();
-            player.sendTextMessage("Arealauswahl abgebrochen.");
-        }
-    }
 }

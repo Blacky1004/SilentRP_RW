@@ -3,9 +3,12 @@ package net.dorblacky.silentrp.managers;
 import net.dorblacky.silentrp.SilentRP;
 import net.dorblacky.silentrp.models.SilentRPConfig;
 import net.dorblacky.silentrp.models.SilentRPTaxOffice;
+import net.dorblacky.silentrp.models.SilentRpPlayer;
 import net.risingworld.api.Plugin;
 import net.risingworld.api.Server;
+import net.risingworld.api.Timer;
 import net.risingworld.api.World;
+import net.risingworld.api.objects.Player;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -24,7 +27,8 @@ public class TaxOfficeManager extends SilentRP {
     private static final String ALGORITHM = "AES";
     private static final String SECRET_KEY = "TrSilentRPTaxofficeKeyTR";
     public static SilentRPTaxOffice  taxOffice;
-
+    public static Timer payTimer;
+    public static long stateMoney = 0;
     public TaxOfficeManager(Plugin plugin, SilentRPConfig configContent) throws Exception {
         this.plugin = plugin;
         this.siilentConfig = configContent;
@@ -87,9 +91,6 @@ public class TaxOfficeManager extends SilentRP {
         return Base64.getEncoder().encodeToString(encryptedBytes);
     }
 
-    /**
-     * Entschlüsselt einen Base64-String aus der Datenbank zurück in eine Zahl.
-     */
     public static double decryptNumber(String encryptedBase64) throws Exception {
         // 1. Base64-String zurück in Bytes decodieren
         byte[] encryptedBytes = Base64.getDecoder().decode(encryptedBase64);
@@ -105,5 +106,35 @@ public class TaxOfficeManager extends SilentRP {
 
         // 4. Zurück in Zahl konvertieren
         return Long.parseLong(decryptedString);
+    }
+
+    public static void startPayTimer(){
+        System.out.println("[SILENTRP-TAXMGM] Paychecksystem is enabled. Starting Paychecktimer.");;
+        payTimer = new Timer(silentConfigData.getPaychecksystem_interval() * 60,0,-1, TaxOfficeManager::doPayCheck);
+        payTimer.start();
+    }
+
+    public static void doPayCheck() {
+        System.out.println("[SILENTRP-TAXMGM] Running paycheck....");
+        int paycheckPlayers = 0;
+        for (Player p: Server.getAllPlayers()){
+            if(!p.isDead() && p.hasAttribute("paycheck") && Server.getRunningTime() - (float)p.getAttribute("paycheck") >= (silentConfigData.getPaychecksystem_interval()) * 60){
+                SilentRpPlayer rp = DatabaseManager.getSilentPlayer(p.getUID());
+                int aktMoney = rp.getMoney();
+                rp.setMoney(aktMoney + silentConfigData.getPaycheck_money());
+                DatabaseManager.updatePlayer(rp);
+                p.sendTextMessage("Du hast eine Sozialleistung in Höhe von "+silentConfigData.getPaycheck_money()+"€ erhalten");
+                stateMoney -= silentConfigData.getPaycheck_money();
+                paycheckPlayers += 1;
+                p.setAttribute("paycheck", Server.getRunningTime());
+            }
+        }
+        System.out.println("[SILENTRP-TAXMGM] Paychecks given vor "+paycheckPlayers+" Players. StateMoney now: "+stateMoney+"€.");;
+    }
+
+    public static void disablePayTimer() {
+        if(payTimer != null){
+            payTimer.kill();
+        }
     }
 }

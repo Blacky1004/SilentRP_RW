@@ -1,7 +1,5 @@
 package net.dorblacky.silentrp.models;
 
-import net.dorblacky.silentrp.classes.SilentRpPlayer;
-
 import java.util.Arrays;
 
 public class SilentRPClan {

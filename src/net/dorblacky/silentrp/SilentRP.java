@@ -18,6 +18,7 @@ public class SilentRP extends Plugin implements Listener {
     public static AssetBundle silentAsstsBudle;
     private ConfigManager silentConfig;
     public  PriceManager priceManager;
+
     @Override
     public void onEnable() {
         try {
@@ -36,6 +37,7 @@ public class SilentRP extends Plugin implements Listener {
 //
 //            }
             new DatabaseManager(this, silentConfigData).checkDatabaseStructure();
+            new AdminManager(this, silentConfigData);
             new CommandManager(this, silentConfigData);
             new PlayerManager(this, silentConfigData);
             new ClanManager(this, silentConfigData);
@@ -55,6 +57,7 @@ public class SilentRP extends Plugin implements Listener {
             priceManager.stopPriceTimer();
             priceManager = null;
         }
+        TaxOfficeManager.disablePayTimer();
     }
 
 }

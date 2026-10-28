@@ -4,6 +4,8 @@ import com.google.gson.Gson;
 import net.risingworld.api.utils.Quaternion;
 import net.risingworld.api.utils.Vector3f;
 
+import java.util.List;
+
 public class SilentTrader {
     public enum traderType{
         HOTEL, ASSOCIATION, BROKER, SHOP, CITIZENSERVICE, PROFESSIONS, CITIZEN, AUCTIONER;
@@ -32,14 +34,29 @@ public class SilentTrader {
                 case 8: return traderType.AUCTIONER;
             }
         }
+
+        public String getTradername() {
+            if(this == ASSOCIATION ) return "Vereinsregister";
+            else if(this == BROKER ) return "Makler";
+            else if(this == SHOP ) return "Verkäufer";
+            else if(this == CITIZENSERVICE ) return "Bürgerservice";
+            else if(this == PROFESSIONS ) return "Berufe";
+            else if(this == CITIZEN ) return "Einwohner";
+            else if(this == AUCTIONER ) return "Auktionator";
+            else return "Hotel/Unterkünfte";
+        }
     }
 
     private int id;
-    private int npc_typeid;
+    private long npc_typeid;
     private String name;
     private int trader_type;
     private String position;
     private int traded_money;
+    private boolean isDeath = false;
+    private List<SilentTraderClothe> clothes;
+    private SilentTraderSkin skin;
+    private float deathTime;
 
     public int getId() {
         return id;
@@ -49,11 +66,11 @@ public class SilentTrader {
         this.id = id;
     }
 
-    public int getNpc_typeid() {
+    public long getNpc_typeid() {
         return npc_typeid;
     }
 
-    public void setNpc_typeid(int npc_typeid) {
+    public void setNpc_typeid(long npc_typeid) {
         this.npc_typeid = npc_typeid;
     }
 
@@ -129,5 +146,37 @@ public class SilentTrader {
         } catch(Exception e){
             e.printStackTrace();
         }
+    }
+
+    public boolean isDeath() {
+        return isDeath;
+    }
+
+    public void setDeath(boolean death) {
+        isDeath = death;
+    }
+
+    public List<SilentTraderClothe> getClothes() {
+        return clothes;
+    }
+
+    public void setClothes(List<SilentTraderClothe> clothes) {
+        this.clothes = clothes;
+    }
+
+    public SilentTraderSkin getSkin() {
+        return skin;
+    }
+
+    public void setSkin(SilentTraderSkin skin) {
+        this.skin = skin;
+    }
+
+    public float getDeathTime() {
+        return deathTime;
+    }
+
+    public void setDeathTime(float deathTime) {
+        this.deathTime = deathTime;
     }
 }

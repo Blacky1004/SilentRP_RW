@@ -41,7 +41,8 @@ public class ConfigManager extends SilentRP{
             configContent.setTaxbank_name("");
             configContent.setEnable_guildsystem(true);
             configContent.setCreate_guild_price(2500);
-
+            configContent.setTrading_respawn_timer(20);
+            configContent.setPaycheck_money(20);
             saveConfig(configContent);
         } else {
             String fileContent = Files.readString(configPath);

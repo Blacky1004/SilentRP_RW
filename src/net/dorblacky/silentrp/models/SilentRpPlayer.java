@@ -1,6 +1,4 @@
-package net.dorblacky.silentrp.classes;
-
-import net.dorblacky.silentrp.models.SilentRPClanMember;
+package net.dorblacky.silentrp.models;
 
 public class SilentRpPlayer {
     private String player_guid;
@@ -9,6 +7,7 @@ public class SilentRpPlayer {
     private int xp;
     private boolean isNewPlayer;
     private SilentRPClanMember clan;
+
 
     public String getId() {
         return player_guid;

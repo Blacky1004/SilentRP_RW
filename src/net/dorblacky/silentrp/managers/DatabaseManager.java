@@ -2,7 +2,7 @@ package net.dorblacky.silentrp.managers;
 
 import net.dorblacky.silentrp.SilentRP;
 import net.dorblacky.silentrp.classes.GlobalBanEntry;
-import net.dorblacky.silentrp.classes.SilentRpPlayer;
+import net.dorblacky.silentrp.models.SilentRpPlayer;
 import net.dorblacky.silentrp.models.*;
 import net.risingworld.api.Plugin;
 import net.risingworld.api.World;
@@ -52,6 +52,14 @@ public class DatabaseManager extends SilentRP {
         //Plugin TraderNPC's Tabelle
         silentDatabase.execute("CREATE TABLE IF NOT EXISTS `srp_traders` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `type_id` INTEGER NOT NULL, " +
                 "`name` VARCHAR(90), `position` TEXT NOT NULL DEFAULT '{}', `traded_money` INTEGER NOT NULL DEFAULT 0, `trader_type` INTEGER NOT NULL DEFAULT 0 );");
+
+        //Plugin TraderSkin Tabelle
+        silentDatabase.execute("Create TABLE IF NOT EXISTS `srp_traderskins` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `trader_id` INTEGER NOT NULL, `hair` INTEGER NOT NULL," +
+                " `beard` INTEGER NOT NULL, `gender` INTEGER NOT NULL, `skin_color` INTEGER NOT NULL, `eye_color` INTEGER NOT NULL, `hair_color` INTEGER NOT NULL, `hair_style` INTEGER NOT NULL);");
+
+        //Plugin Trader Clothes Tabelle
+        silentDatabase.execute("CREATE TABLE IF NOT EXISTS `srp_traderclothes` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `trader_id` INTEGER NOT NULL, " +
+                " `clothe_id` INTEGER NOT NULL, `color_id` INTEGER NOT NULL);");
 
         //Plugin Auktionen Tabelle
         silentDatabase.execute("CREATE TABLE IF NOT EXISTS `srp_auctions`(`id` TEXT PRIMARY KEY NOT NULL, `item_id` VARCHAR(255) NOT NULL, `start_price` INTEGER NOT NULL," +
@@ -112,6 +120,7 @@ public class DatabaseManager extends SilentRP {
                 playerdata.setNewPlayer(true);
                 playerdata.setXp(0);
                 playerdata.setId(player_uid);
+
                 silentDatabase.executeUpdate("INSERT INTO `srp_players` (`player_uid`, `player_money`, `player_level`, `player_xp`) VALUES ('"+player_uid+"', "+playerdata.getMoney()+", "+playerdata.getLevel()+", "+playerdata.getXp()+")");
                 System.out.println("[SILENTRP-DBM] New player '"+playerdata.getId()+"' created.");
             } else{
@@ -120,6 +129,7 @@ public class DatabaseManager extends SilentRP {
                 playerdata.setNewPlayer(false);
                 playerdata.setLevel(result.getInt("player_level"));
                 playerdata.setMoney(result.getInt("player_money"));
+
                 System.out.println("[SILENTRP-DBM] Player '"+playerdata.getId()+"' loaded.");
             }
 
@@ -274,7 +284,7 @@ public class DatabaseManager extends SilentRP {
                 SilentTrader trader = new SilentTrader();
                 trader.setId(result.getInt("id"));
                 trader.setName(result.getString("name"));
-                trader.setNpc_typeid(result.getInt("type_id"));
+                trader.setNpc_typeid(result.getLong("type_id"));
                 trader.setPosition(result.getString("position"));
                 trader.setTraded_money(result.getInt("traded_money"));
                 trader.setTrader_type(result.getInt("trader_type"));
@@ -282,6 +292,7 @@ public class DatabaseManager extends SilentRP {
             }
         } catch(SQLException e){
             System.out.println("[SILENTRP-DBM] ERROR in getTraderNPCs: "+e.getMessage());
+            return null;
         }
         return traders;
     }
@@ -290,7 +301,7 @@ public class DatabaseManager extends SilentRP {
         String sql = "INSERT INTO `srp_traders` (`type_id`, `name`, `position`, `traded_money`, `trader_type`) VALUES (?, ?, ?, ?, ?);";
         Connection conn = silentDatabase.getConnection();
         try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            stmt.setInt(1, trader.getNpc_typeid());
+            stmt.setLong(1, trader.getNpc_typeid());
             stmt.setString(2, trader.getName());
             stmt.setString(3, trader.getPosition());
             stmt.setInt(4, trader.getTraded_money());
@@ -309,6 +320,135 @@ public class DatabaseManager extends SilentRP {
         }
         return trader;
     }
+
+    public static void updateTrader(SilentTrader trader) {
+        String sql = "UPDATE `srp_traders` SET `type_id`=?, `name`=?, `position`=?, `traded_money`=?, `trader_type`=? WHERE `id`=?;";
+        Connection conn = silentDatabase.getConnection();
+        try(PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setLong(1, trader.getNpc_typeid());
+            stmt.setString(2, trader.getName());
+            stmt.setString(3, trader.getPosition());
+            stmt.setInt(4, trader.getTraded_money());
+            stmt.setInt(5, trader.getTrader_type());
+            stmt.setInt(6, trader.getId());
+            stmt.executeUpdate();
+        } catch(SQLException e){
+            System.out.println("[SILENTRP-DBM] ERROR in updateTrader: "+e.getMessage());
+        }
+    }
+
+    public static List<SilentTraderClothe> getTraderClothes(int trader_id) {
+        List<SilentTraderClothe> clothes = new ArrayList<SilentTraderClothe>();
+        String sql = "Select * FROM `srp_traderclothes` WHERE `trader_id`=?;";
+        Connection conn = silentDatabase.getConnection();
+        try(PreparedStatement stmt = conn.prepareStatement(sql)){
+            stmt.setInt(1, trader_id);
+            ResultSet result = stmt.executeQuery();
+            while(result.next()){
+                SilentTraderClothe clothe = new SilentTraderClothe();
+                clothe.setClothe_id(result.getInt("clothe_id"));
+                clothe.setTrader_id(trader_id);
+                clothe.setColor_id(result.getInt("color_id"));
+                clothes.add(clothe);
+            }
+        } catch(SQLException e){
+            System.out.println("[SILENTRP-DBM] ERROR in getTraderClothes: "+e.getMessage());
+            clothes = null;
+        }
+        return clothes;
+    }
+    public static SilentTraderSkin getTraderSkin(int trader_id) {
+        SilentTraderSkin skin = null;
+        String sql = "SELECT * FROM `srp_traderskins` WHERE `trader_id`=?";
+        Connection conn = silentDatabase.getConnection();
+        try(PreparedStatement stmt = conn.prepareStatement(sql)){
+            stmt.setInt(1, trader_id);
+            ResultSet result = stmt.executeQuery();
+            if(result.next()){
+                skin = new SilentTraderSkin();
+                skin.setBeard(result.getInt("beard"));
+                skin.setGender(result.getInt("gender"));
+                skin.setSkinColor(result.getInt("skin_color"));
+                skin.setHair(result.getInt("hair"));
+                skin.setId(result.getInt("id"));
+                skin.setEyeColor(result.getInt("eye_color"));
+                skin.setHairColor(result.getInt("hair_color"));
+                skin.setHairStyle(result.getInt("hair_style"));
+            }
+        } catch(SQLException e){
+            System.out.println("[SILENTRP-DBM] ERROR in updateTrader: "+e.getMessage());
+            skin = null;
+        }
+        return skin;
+    }
+    public static SilentTraderClothe addTraderClothe(SilentTraderClothe clothe) {
+
+        String sql = "INSERT INTO `srp_traderclothes` (`trader_id`, `clothe_id`, `color_id`) VALUES (?, ?, ?);";
+        Connection conn = silentDatabase.getConnection();
+        try(PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)){
+            stmt.setInt(1, clothe.getTrader_id());
+            stmt.setInt(2, clothe.getClothe_id());
+            stmt.setInt(3, clothe.getColor_id());
+            int affectedRows = stmt.executeUpdate();
+            if(affectedRows > 0) {
+                try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        clothe.setId(generatedKeys.getInt(1));
+                    }
+                }
+            }
+        } catch(SQLException e){
+            System.out.println("[SILENTRP-DBM] ERROR in addTraderClothe: "+e.getMessage());
+        }
+        return clothe;
+    }
+    public static SilentTraderSkin addTraderSkin(SilentTraderSkin skin) {
+        String sql = "INSERT INTO `srp_traderskins` (`trader_id`, `hair`, `beard`, `gender`, `skin_color`, `eye_color`, `hair_color`, `hair_style`) VALUES (?, ?, ?, ?, ?, ?, ?,?);";
+        Connection conn = silentDatabase.getConnection();
+        try(PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)){
+            stmt.setInt(1, skin.getTraderId());
+            stmt.setInt(2, skin.getHair());
+            stmt.setInt(3, skin.getBeard());
+            stmt.setInt(4, skin.getGender());
+            stmt.setInt(5, skin.getSkinColor());
+            stmt.setInt(6, skin.getEyeColor());
+            stmt.setInt(7, skin.getHairColor());
+            stmt.setInt(8, skin.getHairStyle());
+
+            int affectedRows = stmt.executeUpdate();
+            if(affectedRows > 0) {
+                try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        skin.setId(generatedKeys.getInt(1));
+                    }
+                }
+            }
+        } catch(SQLException e){
+            System.out.println("[SILENTRP-DBM] ERROR in addTraderClothe: "+e.getMessage());
+        }
+        return skin;
+    }
+    public static void deleteAllTraderClothes(int trader_id) {
+        String sql = "DELETE FROM `srp_traderclothes` WHERE `trader_id`=?;";
+        Connection conn = silentDatabase.getConnection();
+        try(PreparedStatement stmt = conn.prepareStatement(sql)){
+            stmt.setInt(1, trader_id);
+            stmt.executeUpdate();
+        }catch(SQLException e){
+            System.out.println("[SILENTRP-DBM] ERROR in deleteAllTraderClothes: "+e.getMessage());
+        }
+    }
+   public static void deleteAllTraderSkins(int trader_id) {
+        String sql = "DELETE FROM `srp_traderclothes` WHERE `trader_id`=?;";
+        Connection conn = silentDatabase.getConnection();
+        try(PreparedStatement stmt = conn.prepareStatement(sql)){
+            stmt.setInt(1, trader_id);
+            stmt.executeUpdate();
+        }catch(SQLException e){
+            System.out.println("[SILENTRP-DBM] ERROR in deleteAllTraderSkins: "+e.getMessage());
+        }
+    }
+
 
     public List<SilentRPAuction>  getAuctions(){
         List<SilentRPAuction> auctions = new ArrayList<>();
@@ -361,5 +501,22 @@ public class DatabaseManager extends SilentRP {
         } catch (SQLException e) {
             System.out.println("[SILENTRP-DBM] ERROR in updateTaxeState: "+e.getMessage());
         }
+    }
+
+    public static SilentRpPlayer updatePlayer(SilentRpPlayer player) {
+        SilentRpPlayer newPlayer = player;
+        String sql = "UPDATE `srp_players` SET `player_money`=?, `player_level`=?, `player_xp`=? WHERE `player_uid`=?;";
+        Connection conn = silentDatabase.getConnection();
+        try(PreparedStatement stmt = conn.prepareStatement(sql)){
+            stmt.setInt(1, newPlayer.getMoney());
+            stmt.setInt(2, newPlayer.getLevel());
+            stmt.setInt(3, newPlayer.getXp());
+            stmt.setString(4, newPlayer.getPlayer_guid());
+            stmt.executeUpdate();
+        } catch(SQLException e) {
+            System.out.println("[SILENTRP-DBM] ERROR in updatePlayer: "+e.getMessage());
+            return null;
+        }
+        return newPlayer;
     }
 }

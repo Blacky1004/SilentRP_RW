@@ -13,9 +13,11 @@ public class SilentRPConfig {
     private int player_startmoney;
     private boolean enable_paychecksystem;
     private int paychecksystem_interval;
+    private int paycheck_money;
     private float auctions_fee_percent;
     private String taxbank_name;
     private int create_guild_price;
+    private int trading_respawn_timer;
 
     public String getApiKey() {
         return apikey;
@@ -135,5 +137,21 @@ public class SilentRPConfig {
 
     public void setCreate_guild_price(int create_guild_price) {
         this.create_guild_price = create_guild_price;
+    }
+
+    public int getTrading_respawn_timer() {
+        return trading_respawn_timer;
+    }
+
+    public void setTrading_respawn_timer(int trading_respawn_timer) {
+        this.trading_respawn_timer = trading_respawn_timer;
+    }
+
+    public int getPaycheck_money() {
+        return paycheck_money;
+    }
+
+    public void setPaycheck_money(int paycheck_money) {
+        this.paycheck_money = paycheck_money;
     }
 }

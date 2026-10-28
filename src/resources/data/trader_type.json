@@ -1,0 +1,10 @@
+{
+  "hotel": "<b>Hotel/Unterkünfte</b><br>Bei dieser Funktion gibt es zwei Auswahlmöglickeiten. Zum einen kann er als Rezeptionist Zimmer für Übernachtungen anbieten oder aber er vermietet WOhnungen.",
+  "broker": "<b>Makler</b><br>Der Makler verkauft häuser oder Eigentumswohnungen.",
+  "verein": "<b>Vereinsregister</b><br>Bei dieser Funktion bietet der NPC Möglichkeiten zum erstellen eines Clans, oder bietet Mitgliedschaften in solchen an.",
+  "buergerservice": "<b>Bürgerservice</b><br>Bei dieser Funktion fungiert der NPC als Einwanderungsbehörde, die besonders für neue Spieler relevant ist. Duch diesen NPC bekommt man auch seinen Pass.",
+  "berufe": "<b>Berufe</b><br>Bei dieser Funktion, kann der Spieler gegen Entgelt seine Fertigkeiten aufbessern",
+  "einwohner": "<b>Einwohner</b><br>Bei dieser Funktion, stellt der NPC eine reine Person dar, mit der man verschieden Sachen handeln kann.",
+  "auktionator": "<b>Auktionator</b><br>Der Auktionator verwaltet alle Auktionen, die von Spielern eingestellt wurden.",
+  "shop": "<b>Verkäufer</b><br>Dieser NPC verkauft/kauft verschiedene Items aus seinem Laden."
+}
